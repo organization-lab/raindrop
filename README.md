@@ -4,7 +4,7 @@ An open-source macOS menu bar timer for human-being.
 
 ## How to use
 
-1. you should have python 3 installed (tested with Python 3.7)
+1. you should have python 3 installed (tested with Python 3.7 and macOS 10.15.5)
 2. install `rumps` (`$pip install rumps`)
 3. clone or download `raindrop.py`
 4. `$python raindrop.py`
@@ -39,4 +39,4 @@ We believe that proper recall of quotes may help people live happier and more me
 
 ---
 
-(c) Trevize Inc. Organization laboratary. 2020
+(c) Trevize Inc. Organization laboratory. 2020
