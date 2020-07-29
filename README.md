@@ -2,7 +2,15 @@
 
 An open-source macOS menu bar timer for human-being.
 
-Features (some are not implemented yet):
+## How to use
+
+1. you should have python 3 installed (tested with Python 3.7)
+2. install `rumps` (`$pip install rumps`)
+3. clone or download `raindrop.py`
+4. `$python raindrop.py`
+5. find the app icon in your menu bar (top right of your screen) and run your timer :) you should see a counting down number in menu bar.
+
+## Features (some are not implemented yet)
 
 - [] simple digital countdown timer with notification at your macOS menu bar.
 - [] attach notes of projects to each timer
