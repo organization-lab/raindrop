@@ -18,7 +18,7 @@ class TimerApp(object):
         self.timer = rumps.Timer(self.on_tick, 1)
         self.timer.stop()  # timer running when initialized
         self.timer.count = 0
-        self.app = rumps.App("Raindrop", "🍅")
+        self.app = rumps.App("Raindrop", "💧")
         self.start_pause_button = rumps.MenuItem(title='Start Timer',
                                                  callback=lambda _: self.start_timer(_, self.interval))
         self.stop_button = rumps.MenuItem(title='Stop Timer',
@@ -96,7 +96,7 @@ class TimerApp(object):
     def stop_timer(self, sender=None):
         self.timer.stop()
         self.timer.count = 0
-        self.app.title = "🍅"
+        self.app.title = "💧"
         self.stop_button.set_callback(None)
 
         for key, btn in self.buttons.items():
