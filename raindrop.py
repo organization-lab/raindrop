@@ -9,8 +9,15 @@ rumps.debug_mode(True)
 SEC_TO_MIN = 60
 
 
+# global parameters for MVP version
+current_user_input = ''  # temp version
+
+
+log = 'test.log'
+
+
 def timez():
-    return time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.localtime())
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 
 class TimerApp(object):
@@ -25,7 +32,7 @@ class TimerApp(object):
                                           callback=None)
         self.buttons = {}
         self.buttons_callback = {}
-        for i in [5, 10, 15, 20, 25]:
+        for i in [5, 10, 15, 20, 25, 1]:
             title = str(i) + ' Minutes'
             callback = lambda _, j=i: self.set_mins(_, j)
             self.buttons["btn_" + str(i)] = rumps.MenuItem(title=title, callback=callback)
@@ -62,16 +69,26 @@ class TimerApp(object):
         for btn in [*self.buttons.values()]:
             btn.set_callback(None)
 
-        if sender.title.lower().startswith(("start", "continue")):
+        # add a window for user input
+        t = rumps.Window(message='What will this raindrop for?',
+                         title='Raindrop',
+                         default_text='Unspecific',
+                         dimensions=(160,40))
+        global current_user_input  # a temp solution to work
+        global log  # a temp solution to work
+        current_user_input = t.run().text
+        print('{}, {}, {}'.format(timez(), current_user_input, interval))
+        writer = open(log, 'a')
+        writer.write('{}, {}, {}\n'.format(timez(), current_user_input, interval))
 
+
+        if sender.title.lower().startswith(("start", "continue")):
             if sender.title == 'Start Timer':
                 # reset timer & set stop time
                 self.timer.count = 0
                 self.timer.end = interval
-
             # change title of MenuItem from 'Start timer' to 'Pause timer'
             sender.title = 'Pause Timer'
-
             # lift off! start the timer
             self.timer.start()
         else:  # 'Pause Timer'
@@ -84,7 +101,7 @@ class TimerApp(object):
         secs = time_left % 60 if time_left >= 0 else (-1 * time_left) % 60
         if mins == 0 and time_left < 0:
             rumps.notification(title='Raindrop',
-                               subtitle='Time is up! Take a break :)',
+                               subtitle='Time is up for this raindrop - {}! Take a break :)'.format(current_user_input),
                                message='')
             self.stop_timer(sender)
             self.stop_button.set_callback(None)
@@ -106,5 +123,10 @@ class TimerApp(object):
 
 
 if __name__ == '__main__':
+    # write project log to text file (temp)
+    # from sys import argv
+    # script, log_file = argv
+    # log = open(log_file, 'a')
+
     app = TimerApp(timer_interval=1)
     app.run()
