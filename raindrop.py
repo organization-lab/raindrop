@@ -14,10 +14,15 @@ current_user_input = ''  # temp version
 
 
 log = 'test.log'
+writer = open(log, 'a')
 
 
 def timez():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+
+writer.write('open at {}\n'.format(timez()))
+writer.close()
 
 
 class TimerApp(object):
@@ -75,11 +80,12 @@ class TimerApp(object):
                          default_text='Unspecific',
                          dimensions=(160,40))
         global current_user_input  # a temp solution to work
-        global log  # a temp solution to work
         current_user_input = t.run().text
         print('{}, {}, {}'.format(timez(), current_user_input, interval))
+        global log  # TODO(mofhu): make this more elegant
         writer = open(log, 'a')
         writer.write('{}, {}, {}\n'.format(timez(), current_user_input, interval))
+        writer.close()
 
 
         if sender.title.lower().startswith(("start", "continue")):
@@ -100,9 +106,24 @@ class TimerApp(object):
         mins = time_left // 60 if time_left >= 0 else time_left // 60 + 1
         secs = time_left % 60 if time_left >= 0 else (-1 * time_left) % 60
         if mins == 0 and time_left < 0:
+            response = rumps.Window(
+                message='This raindrop is for {}\nHow many % time you concentrated on your main objective? How do you feel now? How do you feel about this raindrop? (1-5 stars)',
+                title='Congratulation! You finished a raindrop today!',
+                default_text='80',
+                ok = '⭐️⭐️⭐️⭐️⭐️'
+            )
+            response.add_buttons(['⭐️⭐️⭐️⭐️', '⭐️⭐️⭐️', '⭐️⭐️', '⭐️'])
+            feedback = response.run()
+            global log  # TODO(mofhu): make this more elegant
+            print('{}, {}'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
+            writer = open(log, 'a')
+            writer.write('{}, {}\n'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
+            writer.close()
+            """
             rumps.notification(title='Raindrop',
                                subtitle='Time is up for this raindrop - {}! Take a break :)'.format(current_user_input),
                                message='')
+            """
             self.stop_timer(sender)
             self.stop_button.set_callback(None)
         else:
