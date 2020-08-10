@@ -8,18 +8,24 @@ An open-source macOS menu bar timer for human-being.
 2. install `rumps` (`$pip install rumps`)
 3. clone or download `raindrop.py`
 4. `$python raindrop.py`
-5. find the app icon in your menu bar (top right of your screen) and run your timer :) you should see a counting down number in menu bar.
+5. find the app icon in your menu bar (top right of your screen) and choose time for your `raindrop`
+6. click `Start Timer`. a window should pop up for inputting `What will this raindrop for?`, then click `OK` (or press Enter)
+7. you should see a counting down number in menu bar
+8. when the raindrop finished, another window should pop up for your feedback
+    - how many percent time you actually used for your purpose (feel free to wondering some time in your raindrop, that's human-being)
+    - a general feedback with 1-5 stars (click will also close the window)
+9. all logs is stored at `test.log` in your `raindrop` folder. you may also like to store rumps debug output to a file by redirecting stdout
 
 ## Features (some are not implemented yet)
 
 - [x] simple digital countdown timer with notification at your macOS menu bar.
-- [ ] attach notes of projects to each timer
-- [ ] attach feedback after timer runs out
-    - a general feedback with 1-5 stars
-    - how many percent time you actually used
-    - how is your efficiency
-- [ ] report analyzer for long-term monitoring and feedback analysis of your `raindrops`
+- [x] attach notes of projects to each timer
+- [x] attach feedback after timer runs out
+    - [x] a general feedback with 1-5 stars
+    - [x] how many percent time you actually used
+    - [ ] how is your efficiency
 - [ ] some random quotes of principles to enhance experience and get more concentrated
+- [ ] report analyzer for long-term monitoring and feedback analysis of your `raindrops`
 
 ## Miscellaneous
 

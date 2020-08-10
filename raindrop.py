@@ -105,9 +105,10 @@ class TimerApp(object):
         time_left = sender.end - sender.count
         mins = time_left // 60 if time_left >= 0 else time_left // 60 + 1
         secs = time_left % 60 if time_left >= 0 else (-1 * time_left) % 60
-        if mins == 0 and time_left < 0:
+        if mins == 0 and time_left < 0:  # TODO(mofhu): check the `pause` issue when click the menubar
+            # global current_user_input  # a temp solution to work
             response = rumps.Window(
-                message='This raindrop is for {}\nHow many % time you concentrated on your main objective? How do you feel now? How do you feel about this raindrop? (1-5 stars)',
+                message='This raindrop is for {}\nHow many % time you concentrated on your main objective? How do you feel now? How do you feel about this raindrop? (1-5 stars)'.format(current_user_input),
                 title='Congratulation! You finished a raindrop today!',
                 default_text='80',
                 ok = '⭐️⭐️⭐️⭐️⭐️'
