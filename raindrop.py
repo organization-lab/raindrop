@@ -1,9 +1,10 @@
 import rumps
 import time
 import os
+from sys import argv
 
 
-rumps.debug_mode(True)
+rumps.debug_mode(True)  # rumps debug is useful for dev and usage
 
 
 SEC_TO_MIN = 60
@@ -13,7 +14,9 @@ SEC_TO_MIN = 60
 current_user_input = ''  # temp version
 
 
-log = 'test.log'
+script, quote, log = argv  # two file i/o for MVP
+
+
 writer = open(log, 'a')
 
 
@@ -21,7 +24,13 @@ def timez():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 
-writer.write('open at {}\n'.format(timez()))
+def get_quote(quote):
+    quote_list = open(quote).readlines()
+    from random import choice
+    return choice(quote_list)
+
+
+writer.write('raindrop.open: {}\n'.format(timez()))
 writer.close()
 
 
@@ -58,7 +67,7 @@ class TimerApp(object):
 
     def set_things_mins(self, sender):
         # pass_interval = get_things_min()
-        print("pass_interval is now", pass_interval)
+        print("raindrop.interval:", pass_interval)
         # self.button_things.title = "Default (" + str(round(pass_interval)) + "min)"
         # self.set_mins(sender, pass_interval)
 
@@ -74,17 +83,19 @@ class TimerApp(object):
         for btn in [*self.buttons.values()]:
             btn.set_callback(None)
 
+        global quote
+        start_quote = get_quote(quote)
         # add a window for user input
-        t = rumps.Window(message='What will this raindrop for?',
+        t = rumps.Window(message='{}\nWhat will this raindrop for?'.format(start_quote),
                          title='Raindrop',
                          default_text='Unspecific',
                          dimensions=(160,40))
         global current_user_input  # a temp solution to work
         current_user_input = t.run().text
-        print('{}, {}, {}'.format(timez(), current_user_input, interval))
+        print('raindrop.start: {}, {}, {}'.format(timez(), current_user_input, interval))
         global log  # TODO(mofhu): make this more elegant
         writer = open(log, 'a')
-        writer.write('{}, {}, {}\n'.format(timez(), current_user_input, interval))
+        writer.write('raindrop.start: {}, {}, {}\n'.format(timez(), current_user_input, interval))
         writer.close()
 
 
@@ -107,8 +118,10 @@ class TimerApp(object):
         secs = time_left % 60 if time_left >= 0 else (-1 * time_left) % 60
         if mins == 0 and time_left < 0:  # TODO(mofhu): check the `pause` issue when click the menubar
             # global current_user_input  # a temp solution to work
+            global quote
+            end_quote = get_quote(quote)
             response = rumps.Window(
-                message='This raindrop is for {}\nHow many % time you concentrated on your main objective? How do you feel now? How do you feel about this raindrop? (1-5 stars)'.format(current_user_input),
+                message='{}\nThis raindrop is for {}\nHow many % time you concentrated on your main objective? How do you feel now? How do you feel about this raindrop? (1-5 stars)'.format(end_quote, current_user_input),
                 title='Congratulation! You finished a raindrop today!',
                 default_text='80',
                 ok = '⭐️⭐️⭐️⭐️⭐️'
@@ -116,9 +129,9 @@ class TimerApp(object):
             response.add_buttons(['⭐️⭐️⭐️⭐️', '⭐️⭐️⭐️', '⭐️⭐️', '⭐️'])
             feedback = response.run()
             global log  # TODO(mofhu): make this more elegant
-            print('{}, {}'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
+            print('raindrop.end.feedback: {}, {}'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
             writer = open(log, 'a')
-            writer.write('{}, {}\n'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
+            writer.write('raindrop.end.feedback: {}, {}\n'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
             writer.close()
             """
             rumps.notification(title='Raindrop',
@@ -142,6 +155,7 @@ class TimerApp(object):
             btn.set_callback(self.buttons_callback[btn.title])
 
         self.start_pause_button.title = 'Start Timer'
+
 
 
 if __name__ == '__main__':
