@@ -82,29 +82,30 @@ class TimerApp(object):
     def start_timer(self, sender, interval):
         for btn in [*self.buttons.values()]:
             btn.set_callback(None)
-
-        global quote
-        start_quote = get_quote(quote)
-        # add a window for user input
-        t = rumps.Window(message='{}\nWhat will this raindrop for?'.format(start_quote),
-                         title='Raindrop',
-                         default_text='Unspecific',
-                         dimensions=(160,40))
-        global current_user_input  # a temp solution to work
-        current_user_input = t.run().text
-        print('raindrop.start: {}, {}, {}'.format(timez(), current_user_input, interval))
-        global log  # TODO(mofhu): make this more elegant
-        writer = open(log, 'a')
-        writer.write('raindrop.start: {}, {}, {}\n'.format(timez(), current_user_input, interval))
-        writer.close()
-
-
-        if sender.title.lower().startswith(("start", "continue")):
-            if sender.title == 'Start Timer':
-                # reset timer & set stop time
-                self.timer.count = 0
-                self.timer.end = interval
+        # sender.title could be "Start Timer"/"Continue Timer"/"Pause Timer"
+        if sender.title == 'Start Timer':
+            global quote
+            start_quote = get_quote(quote)
+            # add a window for user input
+            t = rumps.Window(message='{}\nWhat will this raindrop for?'.format(start_quote),
+                            title='Raindrop',
+                            default_text='Unspecific',
+                            dimensions=(160,40))
+            global current_user_input  # a temp solution to work
+            current_user_input = t.run().text
+            print('raindrop.start: {}, {}, {}'.format(timez(), current_user_input, interval))
+            global log  # TODO(mofhu): make this more elegant
+            writer = open(log, 'a')
+            writer.write('raindrop.start: {}, {}, {}\n'.format(timez(), current_user_input, interval))
+            writer.close()
+            # reset timer & set stop time
+            self.timer.count = 0
+            self.timer.end = interval
             # change title of MenuItem from 'Start timer' to 'Pause timer'
+            sender.title = 'Pause Timer'
+            # lift off! start the timer
+            self.timer.start()
+        elif sender.title == 'Continue Timer':
             sender.title = 'Pause Timer'
             # lift off! start the timer
             self.timer.start()
@@ -133,11 +134,6 @@ class TimerApp(object):
             writer = open(log, 'a')
             writer.write('raindrop.end.feedback: {}, {}\n'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
             writer.close()
-            """
-            rumps.notification(title='Raindrop',
-                               subtitle='Time is up for this raindrop - {}! Take a break :)'.format(current_user_input),
-                               message='')
-            """
             self.stop_timer(sender)
             self.stop_button.set_callback(None)
         else:
@@ -150,6 +146,7 @@ class TimerApp(object):
         self.timer.count = 0
         self.app.title = "💧"
         self.stop_button.set_callback(None)
+        # TODO(mofhu): add a output log here, and also for quit app
 
         for key, btn in self.buttons.items():
             btn.set_callback(self.buttons_callback[btn.title])
