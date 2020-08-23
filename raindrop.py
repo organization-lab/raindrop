@@ -1,42 +1,24 @@
 import rumps
 import time
-import os
-from sys import argv
-
-
-rumps.debug_mode(True)  # rumps debug is useful for dev and usage
 
 
 SEC_TO_MIN = 60
-
-
-# global parameters for MVP version
-current_user_input = ''  # temp version
-
-
-script, quote, log = argv  # two file i/o for MVP
-
-
-writer = open(log, 'a')
 
 
 def timez():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 
-def get_quote(quote):
-    quote_list = open(quote).readlines()
-    from random import choice
-    return choice(quote_list)
-
-
-writer.write('raindrop.open: {}\n'.format(timez()))
-writer.close()
-
-
 class TimerApp(object):
-    def __init__(self, timer_interval=1):
+    def __init__(self, log, quote, debug_mode):
         self.timer = rumps.Timer(self.on_tick, 1)
+        self.log = log
+        self.quote = quote
+        self.debug_mode = debug_mode
+        with open(self.log, 'a') as log_writer:  # append mode
+            log_writer.write('raindrop.open: {}\n'.format(timez()))
+        if self.debug_mode:
+            rumps.debug_mode(True)  # rumps debug info is useful for dev and usage
         self.timer.stop()  # timer running when initialized
         self.timer.count = 0
         self.app = rumps.App("Raindrop", "💧")
@@ -46,7 +28,11 @@ class TimerApp(object):
                                           callback=None)
         self.buttons = {}
         self.buttons_callback = {}
-        for i in [5, 10, 15, 20, 25, 1]:
+        self.timer_list = [5, 10, 15, 20, 25]  # TODO(mofhu): maybe extend it later as an optional user input
+        if self.debug_mode:
+            self.timer_list.append(1)  # only add 1 min in debug mode
+
+        for i in self.timer_list:
             title = str(i) + ' Minutes'
             callback = lambda _, j=i: self.set_mins(_, j)
             self.buttons["btn_" + str(i)] = rumps.MenuItem(title=title, callback=callback)
@@ -61,6 +47,11 @@ class TimerApp(object):
             *self.buttons.values(),
             None,
             self.stop_button]
+
+    def get_quote(self):
+        quote_list = open(self.quote).readlines()
+        from random import choice
+        return choice(quote_list)
 
     def run(self):
         self.app.run()
@@ -84,20 +75,16 @@ class TimerApp(object):
             btn.set_callback(None)
         # sender.title could be "Start Timer"/"Continue Timer"/"Pause Timer"
         if sender.title == 'Start Timer':
-            global quote
-            start_quote = get_quote(quote)
+            start_quote = self.get_quote()
             # add a window for user input
             t = rumps.Window(message='{}\nWhat will this raindrop for?'.format(start_quote),
                             title='Raindrop',
                             default_text='Unspecific',
                             dimensions=(160,40))
-            global current_user_input  # a temp solution to work
-            current_user_input = t.run().text
-            print('raindrop.start: {}, {}, {}'.format(timez(), current_user_input, interval))
-            global log  # TODO(mofhu): make this more elegant
-            writer = open(log, 'a')
-            writer.write('raindrop.start: {}, {}, {}\n'.format(timez(), current_user_input, interval))
-            writer.close()
+            self.current_user_input = t.run().text
+            print('raindrop.start: {}, {}, {}'.format(timez(), self.current_user_input, interval))
+            with open(self.log, 'a') as log_writer:  # append mode
+                log_writer.write('raindrop.start: {}, {}, {}\n'.format(timez(), self.current_user_input, interval))
             # reset timer & set stop time
             self.timer.count = 0
             self.timer.end = interval
@@ -118,22 +105,18 @@ class TimerApp(object):
         mins = time_left // 60 if time_left >= 0 else time_left // 60 + 1
         secs = time_left % 60 if time_left >= 0 else (-1 * time_left) % 60
         if mins == 0 and time_left < 0:  # TODO(mofhu): check the `pause` issue when click the menubar
-            # global current_user_input  # a temp solution to work
-            global quote
-            end_quote = get_quote(quote)
+            end_quote = self.get_quote()
             response = rumps.Window(
-                message='{}\nThis raindrop is for {}\nHow many % time you concentrated on your main objective? How do you feel now? How do you feel about this raindrop? (1-5 stars)'.format(end_quote, current_user_input),
+                message='{}\nThis raindrop is for {}.\nHow many % time you concentrated on your main objective? How do you feel now? How do you feel about this raindrop? (1-5 stars)'.format(end_quote, self.current_user_input),
                 title='Congratulation! You finished a raindrop today!',
                 default_text='80',
                 ok = '⭐️⭐️⭐️⭐️⭐️'
             )
             response.add_buttons(['⭐️⭐️⭐️⭐️', '⭐️⭐️⭐️', '⭐️⭐️', '⭐️'])
             feedback = response.run()
-            global log  # TODO(mofhu): make this more elegant
             print('raindrop.end.feedback: {}, {}'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
-            writer = open(log, 'a')
-            writer.write('raindrop.end.feedback: {}, {}\n'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
-            writer.close()
+            with open(self.log, 'a') as log_writer:  # append mode
+                log_writer.write('raindrop.end.feedback: {}, {}\n'.format(6-feedback.clicked, feedback.text))  # 5 stars == button 1 ... 1 star == button 5
             self.stop_timer(sender)
             self.stop_button.set_callback(None)
         else:
@@ -156,10 +139,22 @@ class TimerApp(object):
 
 
 if __name__ == '__main__':
-    # write project log to text file (temp)
-    # from sys import argv
-    # script, log_file = argv
-    # log = open(log_file, 'a')
+    # parse argument
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('log',
+                        help='Path of log file')
+    parser.add_argument('quote',
+                        help='Path of quote file')
+    parser.add_argument('-d', '--debug',
+                        help='Flag of debug mode. Debug mode enables 1) `rumps` output 2) 1 min timer for test',
+                        action='store_true')
+    args = parser.parse_args()
+    if args.debug:
+        print(args.log, args.quote, args.debug)
 
-    app = TimerApp(timer_interval=1)
+    # init app
+    app = TimerApp(log=args.log,
+                   quote=args.quote,
+                   debug_mode=args.debug)
     app.run()

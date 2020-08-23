@@ -4,10 +4,13 @@ An open-source macOS menu bar timer for human-being.
 
 ## How to use
 
-1. you should have python 3 installed (tested with Python 3.7 and macOS 10.15.5)
+1. you should have python 3 installed (tested with Python 3.7.2 and macOS Catalina 10.15.5)
 2. install `rumps` (`$pip install rumps`)
 3. clone or download `raindrop.py`
-4. `$python raindrop.py`
+4. `$python raindrop.py [-d] your_log_file your_quote_file`
+    - `your_log_file` could be created by `raindrop`
+    - `your_quote_file` one quote for one line
+    - (optional) `debug_mode`: Debug mode enables 1) `rumps` output 2) 1 min timer for test
 5. find the app icon in your menu bar (top right of your screen) and choose time for your `raindrop`
 6. click `Start Timer`. a window should pop up for inputting `What will this raindrop for?`, then click `OK` (or press Enter)
 7. you should see a counting down number in menu bar
@@ -24,7 +27,7 @@ An open-source macOS menu bar timer for human-being.
     - [x] a general feedback with 1-5 stars
     - [x] how many percent time you actually used
     - [ ] how is your efficiency
-- [ ] some random quotes of principles to enhance experience and get more concentrated
+- [x] some random quotes of principles to enhance experience and get more concentrated
 - [ ] report analyzer for long-term monitoring and feedback analysis of your `raindrops`
 
 ## Miscellaneous
